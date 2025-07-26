@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Loan Management System</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #f0f2f5;
+      margin: 0;
+      padding: 0;
+    }
+
+    .container {
+      max-width: 600px;
+      margin: 50px auto;
+      background-color: #ffffff;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+
+    h2 {
+      text-align: center;
+      color: #333333;
+    }
+
+    label {
+      display: block;
+      margin-top: 20px;
+      color: #555555;
+    }
+
+    input[type="text"],
+    input[type="number"] {
+      width: 100%;
+      padding: 10px;
+      margin-top: 8px;
+      border: 1px solid #cccccc;
+      border-radius: 6px;
+      box-sizing: border-box;
+    }
+
+    button {
+      margin-top: 30px;
+      width: 100%;
+      padding: 12px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+
+    button:hover {
+      background-color: #0056b3;
+    }
+
+    .response {
+      margin-top: 20px;
+      padding: 15px;
+      background-color: #e9f7ef;
+      border: 1px solid #28a745;
+      color: #155724;
+      border-radius: 6px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Loan Application</h2>
+    <form id="loan-form">
+      <label for="customerId">Customer ID:</label>
+      <input type="text" id="customerId" name="customerId" required>
+
+      <label for="loanAmount">Loan Amount:</label>
+      <input type="number" id="loanAmount" name="loanAmount" required>
+
+      <label for="loanPeriod">Loan Period (in years):</label>
+      <input type="number" id="loanPeriod" name="loanPeriod" required>
+
+      <label for="interestRate">Rate of Interest (%):</label>
+      <input type="number" id="interestRate" name="interestRate" required>
+
+      <button type="submit">Apply for Loan</button>
+    </form>
+
+    <div class="response" id="loan-response" style="display:none;"></div>
+  </div>
+
+  <script>
+    const form = document.getElementById('loan-form');
+    const responseDiv = document.getElementById('loan-response');
+
+    form.addEventListener('submit', async function (e) {
+      e.preventDefault();
+
+      const customerId = document.getElementById('customerId').value;
+      const loanAmount = document.getElementById('loanAmount').value;
+      const loanPeriod = document.getElementById('loanPeriod').value;
+      const interestRate = document.getElementById('interestRate').value;
+
+      const payload = {
+        customer_id: customerId,
+        loan_amount: parseFloat(loanAmount),
+        loan_period: parseFloat(loanPeriod),
+        interest_rate: parseFloat(interestRate)
+      };
+
+      const res = await fetch('http://localhost:5000/lend', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(payload)
+      });
+
+      const data = await res.json();
+
+      responseDiv.style.display = 'block';
+      responseDiv.innerHTML = `
+        <strong>Loan ID:</strong> ${data.loan_id} <br>
+        <strong>Total Amount:</strong> ₹${data.total_amount.toFixed(2)} <br>
+        <strong>Monthly EMI:</strong> ₹${data.emi.toFixed(2)}
+      `;
+    });
+  </script>
+</body>
+</html>

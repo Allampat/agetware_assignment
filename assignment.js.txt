@@ -1,0 +1,60 @@
+<script>
+  const form = document.getElementById('loan-form');
+  const responseDiv = document.getElementById('loan-response');
+
+  form.addEventListener('submit', async function (e) {
+    e.preventDefault();
+
+    const customerId = document.getElementById('customerId').value.trim();
+    const loanAmount = parseFloat(document.getElementById('loanAmount').value);
+    const loanPeriod = parseFloat(document.getElementById('loanPeriod').value);
+    const interestRate = parseFloat(document.getElementById('interestRate').value);
+
+    if (!customerId || isNaN(loanAmount) || isNaN(loanPeriod) || isNaN(interestRate)) {
+      responseDiv.style.display = 'block';
+      responseDiv.style.backgroundColor = '#f8d7da';
+      responseDiv.style.color = '#721c24';
+      responseDiv.innerHTML = `❌ Please fill in all fields correctly.`;
+      return;
+    }
+
+    responseDiv.style.display = 'block';
+    responseDiv.style.backgroundColor = '#fff3cd';
+    responseDiv.style.color = '#856404';
+    responseDiv.innerHTML = `⏳ Processing your loan application...`;
+
+    try {
+      const payload = {
+        customer_id: customerId,
+        loan_amount: loanAmount,
+        loan_period: loanPeriod,
+        interest_rate: interestRate
+      };
+
+      const res = await fetch('http://localhost:5000/lend', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+
+      if (!res.ok) throw new Error("Server error");
+
+      const data = await res.json();
+
+      responseDiv.style.backgroundColor = '#e9f7ef';
+      responseDiv.style.color = '#155724';
+      responseDiv.innerHTML = `
+        ✅ <strong>Loan ID:</strong> ${data.loan_id}<br>
+        💰 <strong>Total Amount:</strong> ₹${data.total_amount.toFixed(2)}<br>
+        📆 <strong>Monthly EMI:</strong> ₹${data.emi.toFixed(2)}
+      `;
+
+      form.reset();
+
+    } catch (err) {
+      responseDiv.style.backgroundColor = '#f8d7da';
+      responseDiv.style.color = '#721c24';
+      responseDiv.innerHTML = `❌ Failed to process loan. Please try again later.`;
+    }
+  });
+</script>
